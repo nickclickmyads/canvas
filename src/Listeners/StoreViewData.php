@@ -20,7 +20,7 @@ class StoreViewData
                 'post_id' => $event->post->id,
                 'ip'      => request()->getClientIp(),
                 'agent'   => request()->header('user_agent'),
-                'referer' => $this->validUrl((string) request()->header('referer')),
+                'referer' => $this->validUrl((string) $url = request()->header('referer')) ? $this->cleanUrl($url) : false,
             ];
 
             $event->post->views()->create($view_data);
@@ -62,5 +62,17 @@ class StoreViewData
     private function validUrl(string $url)
     {
         return filter_var($url, FILTER_VALIDATE_URL) ?? null;
+    }
+
+    /**
+     * Return clean URLs.
+     *
+     * @param string $url
+     * @return string
+     */
+    private function cleanUrl(string $url)
+    {
+        $url = parse_url($url);
+        return $url['scheme'] . '://' . $url['host'];
     }
 }
